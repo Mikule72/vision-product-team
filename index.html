@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vision Product Team — Offres 2026</title>
+
+  <!-- Firebase v10 compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f6fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ===== SETUP BANNER ===== */
+    #setup-banner {
+      background: #fffbeb;
+      border-bottom: 2px solid #f59e0b;
+      padding: 14px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    #setup-banner.hidden { display: none; }
+    #setup-banner .banner-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    #setup-banner .banner-body { flex: 1; }
+    #setup-banner strong { font-size: 14px; color: #92400e; display: block; margin-bottom: 6px; }
+    #setup-banner ol { padding-left: 18px; color: #78350f; line-height: 1.8; }
+    #setup-banner ol li { margin-bottom: 2px; }
+    #setup-banner code {
+      background: #fde68a;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    #setup-banner a { color: #b45309; }
+    #setup-banner .banner-close {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      align-self: center;
+      white-space: nowrap;
+    }
+    #setup-banner .banner-close:hover { background: #d97706; }
+
+    /* ===== APP HEADER ===== */
+    .app-header {
+      text-align: center;
+      padding: 24px 24px 12px;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .app-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.3px;
+    }
+    .app-header p {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* ===== PILLAR LEGEND ===== */
+    .pillar-legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 10px 24px;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .app-body {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Column headers */
+    .col-headers {
+      display: grid;
+      grid-template-columns: 100px repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 6px;
+      padding-left: 0;
+    }
+    .col-header-spacer { /* empty left cell */ }
+    .col-header {
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 8px 8px 0 0;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: white;
+    }
+
+    /* Row wrapper */
+    .row-wrapper {
+      display: grid;
+      grid-template-columns: 100px repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: stretch;
+    }
+
+    /* Row label */
+    .row-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #374151;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      padding: 12px 4px;
+    }
+
+    /* ===== CELL ===== */
+    .cell {
+      background: white;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .cell:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+    .cell-top {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .cell-offer-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .cell-description {
+      font-size: 11px;
+      color: #4b5563;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .cell-icp-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #9ca3af;
+      margin-bottom: 2px;
+    }
+    .cell-icp {
+      font-size: 11px;
+      color: #374151;
+      font-style: italic;
+    }
+
+    /* ===== EXPERTS SECTION ===== */
+    .cell-experts {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #6b7280;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 10px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+    .experts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+    .expert-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .expert-item:hover { background: #f9fafb; }
+    .expert-item input[type="checkbox"] { display: none; }
+    .expert-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      background: white;
+    }
+    .expert-check svg {
+      display: none;
+      width: 9px;
+      height: 9px;
+    }
+    .expert-item.checked .expert-check {
+      border-color: transparent;
+    }
+    .expert-item.checked .expert-check svg { display: block; }
+    .expert-name {
+      font-size: 11px;
+      color: #374151;
+      font-weight: 500;
+    }
+    .expert-item.checked .expert-name { font-weight: 700; }
+
+    /* ===== REX SECTION ===== */
+    .cell-rex {
+      padding: 10px 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .add-rex-btn {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1.5px dashed #d1d5db;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      transition: all 0.15s;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .add-rex-btn:hover {
+      border-color: #9ca3af;
+      background: #f9fafb;
+      color: #374151;
+    }
+
+    .rex-empty {
+      font-size: 11px;
+      color: #d1d5db;
+      text-align: center;
+      padding: 8px 0;
+      font-style: italic;
+    }
+
+    .rex-cards { display: flex; flex-direction: column; gap: 6px; }
+
+    .rex-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 7px;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+    .rex-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+    .rex-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      cursor: pointer;
+      gap: 8px;
+      background: #fafafa;
+    }
+    .rex-card-header:hover { background: #f3f4f6; }
+
+    .rex-card-title {
+      flex: 1;
+      min-width: 0;
+    }
+    .rex-client {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1f2937;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rex-subject {
+      font-size: 10px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rex-toggle {
+      flex-shrink: 0;
+      color: #9ca3af;
+      transition: transform 0.2s;
+      font-size: 10px;
+    }
+    .rex-card.expanded .rex-toggle { transform: rotate(180deg); }
+
+    .rex-card-body {
+      display: none;
+      padding: 10px;
+      border-top: 1px solid #f3f4f6;
+      font-size: 11px;
+      color: #374151;
+      line-height: 1.6;
+    }
+    .rex-card.expanded .rex-card-body { display: block; }
+
+    .rex-field { margin-bottom: 6px; }
+    .rex-field-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #9ca3af;
+      margin-bottom: 1px;
+    }
+    .rex-field-value { color: #1f2937; }
+    .rex-consultants {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .rex-consultant-tag {
+      background: #f3f4f6;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      color: #374151;
+      font-weight: 500;
+    }
+    .rex-delete-btn {
+      margin-top: 8px;
+      padding: 5px 10px;
+      border: 1px solid #fee2e2;
+      border-radius: 5px;
+      background: #fff5f5;
+      color: #dc2626;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .rex-delete-btn:hover { background: #fee2e2; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 15, 35, 0.5);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.hidden { display: none; }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 1;
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+    .modal-cell-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      color: white;
+    }
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: #e5e7eb; }
+
+    .modal-form { padding: 18px 20px 20px; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-group label .required { color: #ef4444; margin-left: 2px; }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #1f2937;
+      font-family: inherit;
+      transition: border-color 0.15s;
+      background: #fafafa;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #6b7280;
+      background: white;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .consultants-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .consultant-check-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 8px;
+      border-radius: 5px;
+      border: 1.5px solid #e5e7eb;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .consultant-check-item:hover { background: #f9fafb; border-color: #d1d5db; }
+    .consultant-check-item input[type="checkbox"] { display: none; }
+    .consultant-check-item.checked {
+      background: #f0fdf4;
+      border-color: #16a34a;
+    }
+    .consultant-check-item .c-check {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+      border: 2px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .consultant-check-item.checked .c-check {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+    .consultant-check-item.checked .c-check::after {
+      content: '';
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid white;
+      border-bottom: 2px solid white;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+    .consultant-check-item .c-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: #374151;
+    }
+    .consultant-check-item.checked .c-name { color: #166534; font-weight: 700; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .btn-cancel {
+      padding: 8px 18px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 7px;
+      background: white;
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-cancel:hover { background: #f9fafb; }
+    .btn-submit {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 7px;
+      background: #1a1a2e;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-submit:hover { background: #2d2d50; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .form-error {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #dc2626;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+
+    /* ===== PILLAR COLORS (applied via JS) ===== */
+    /* strategie: blue, operationnel: purple, business: green */
+  </style>
+</head>
+<body>
+
+<!-- ===== SETUP BANNER ===== -->
+<div id="setup-banner">
+  <div class="banner-icon">⚠️</div>
+  <div class="banner-body">
+    <strong>Configuration Firebase requise — À faire une seule fois</strong>
+    <ol>
+      <li>Créez un projet sur <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
+      <li>Activez <strong>Firestore Database</strong> (Build &gt; Firestore &gt; Créer une base de données &gt; Mode test)</li>
+      <li>Dans Paramètres du projet &gt; Général, créez une app Web (<code>&lt;/&gt;</code>) et copiez l'objet <code>firebaseConfig</code></li>
+      <li>Ouvrez ce fichier HTML dans un éditeur et collez la config dans la section <code>[1] FIREBASE CONFIG</code></li>
+      <li>Rechargez la page, ouvrez la console DevTools (F12) &gt; cliquez le lien Firebase pour créer l'index automatiquement</li>
+      <li>Hébergez le fichier (GitHub Pages, Netlify, Google Drive…) et partagez le lien avec l'équipe</li>
+    </ol>
+  </div>
+  <button class="banner-close" onclick="dismissBanner()">✓ Firebase configuré</button>
+</div>
+
+<!-- ===== APP HEADER ===== -->
+<div class="app-header">
+  <h1>Vision Product Team — Offres 2026</h1>
+  <p>3 piliers de valeur · Experts &amp; REX par segment</p>
+</div>
+
+<!-- ===== PILLAR LEGEND ===== -->
+<div class="pillar-legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#1a6fc4"></div>
+    Stratégie
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#7c3aed"></div>
+    Opérationnel
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#16a34a"></div>
+    Business
+  </div>
+</div>
+
+<!-- ===== MAIN BODY ===== -->
+<div class="app-body">
+  <!-- Column headers -->
+  <div class="col-headers">
+    <div class="col-header-spacer"></div>
+    <div class="col-header" style="background:#1a6fc4">Stratégie</div>
+    <div class="col-header" style="background:#7c3aed">Opérationnel</div>
+    <div class="col-header" style="background:#16a34a">Business</div>
+  </div>
+
+  <!-- Row: Corporate / GG -->
+  <div class="row-wrapper">
+    <div class="row-label">Corporate / GG</div>
+    <div class="cell" id="cell-strategie_gg" data-cell="strategie_gg"></div>
+    <div class="cell" id="cell-operationnel_gg" data-cell="operationnel_gg"></div>
+    <div class="cell" id="cell-business_gg" data-cell="business_gg"></div>
+  </div>
+
+  <!-- Row: ETI / SMB -->
+  <div class="row-wrapper">
+    <div class="row-label">ETI / SMB</div>
+    <div class="cell" id="cell-strategie_etismb" data-cell="strategie_etismb"></div>
+    <div class="cell" id="cell-operationnel_etismb" data-cell="operationnel_etismb"></div>
+    <div class="cell" id="cell-business_etismb" data-cell="business_etismb"></div>
+  </div>
+</div>
+
+<!-- ===== REX MODAL ===== -->
+<div id="rex-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2>Ajouter un REX</h2>
+      </div>
+      <span id="modal-cell-badge" class="modal-cell-badge"></span>
+      <button class="modal-close" id="modal-close-btn">✕</button>
+    </div>
+    <form id="rex-form" class="modal-form" novalidate>
+      <input type="hidden" id="form-cell-id" />
+
+      <div class="form-group">
+        <label>Nom de l'entreprise cliente <span class="required">*</span></label>
+        <input type="text" id="f-client-name" placeholder="Ex : BNP Paribas, Decathlon…" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom &amp; prénom du contact <span class="required">*</span></label>
+          <input type="text" id="f-contact-name" placeholder="Ex : Marie Dupont" />
+        </div>
+        <div class="form-group">
+          <label>Poste du contact</label>
+          <input type="text" id="f-contact-role" placeholder="Ex : CMO, Head of Product…" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Sujet de la mission <span class="required">*</span></label>
+        <input type="text" id="f-mission-subject" placeholder="Ex : Refonte du site corporate" />
+      </div>
+
+      <div class="form-group">
+        <label>Détail de la mission</label>
+        <textarea id="f-mission-detail" placeholder="Contexte, enjeux, livrables, résultats obtenus…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Consultants impliqués</label>
+        <div class="consultants-grid" id="modal-consultants-grid"></div>
+      </div>
+
+      <div class="form-error" id="form-error"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modal-cancel-btn">Annuler</button>
+        <button type="submit" class="btn-submit" id="form-submit-btn">Enregistrer le REX</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// [1] FIREBASE CONFIG — Collez votre configuration ici
+// Obtenez-la sur : Firebase Console > Paramètres > Vos apps > Web
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCEX9JYukYI6vdeniJPP6DCN8YCQKlZayk",
+  authDomain: "vision-product-2026.firebaseapp.com",
+  projectId: "vision-product-2026",
+  storageBucket: "vision-product-2026.firebasestorage.app",
+  messagingSenderId: "711656267703",
+  appId: "1:711656267703:web:59f4914962194b8cdb5232",
+  measurementId: "G-0ET5R2XZK9"
+};
+// ============================================================
+
+// ============================================================
+// [2] CONSTANTES
+// ============================================================
+const CONSULTANTS = ["Clément", "Julien", "Cyrielle", "Louise", "Maxime", "Enzo", "Marie", "Vincent"];
+
+const CELL_IDS = [
+  "strategie_gg", "operationnel_gg", "business_gg",
+  "strategie_etismb", "operationnel_etismb", "business_etismb"
+];
+
+const PILLAR_COLORS = {
+  strategie:    { primary: "#1a6fc4", light: "#e8f2ff", border: "#93c5fd" },
+  operationnel: { primary: "#7c3aed", light: "#f3eeff", border: "#c4b5fd" },
+  business:     { primary: "#16a34a", light: "#ecfdf5", border: "#86efac" }
+};
+
+const PILLAR_LABELS = {
+  strategie:    "Stratégie",
+  operationnel: "Opérationnel",
+  business:     "Business"
+};
+
+const SEGMENT_LABELS = {
+  gg:      "Corporate / GG",
+  etismb:  "ETI / SMB"
+};
+
+const CELL_CONTENT = {
+  strategie_gg: {
+    offerName: "Strat / Product Partner",
+    offerSub: "Accompagnement orga & vision produit",
+    description: "Réorganisation d'équipe digitale, coaching de Head of Product, mise en place de gouvernance produit.",
+    icp: "CPO ou Resp. Market' GG"
+  },
+  strategie_etismb: {
+    offerName: "Strat / Product Partner",
+    offerSub: "Accompagnement orga & vision produit",
+    description: "Accompagnement du client pour la définition de la roadmap stratégique et structurer l'équipe autour du produit.",
+    icp: "CEO, CMO, Resp. Digital"
+  },
+  operationnel_gg: {
+    offerName: "Efficacité Opérationnelle",
+    offerSub: "Employee experience + excellence ops",
+    description: "Audit et refonte des outils internes existants (type « usine à gaz »), stratégie de déploiement et d'adoption type Growth en traitant l'employé comme un client B2C, orchestration du build en lien avec la DSI.",
+    icp: "DSI, CMO ou Resp. Market' ou COO"
+  },
+  operationnel_etismb: {
+    offerName: "Efficacité Opérationnelle",
+    offerSub: "Employee experience + excellence ops",
+    description: "Construction d'outils métiers sur-mesure pour digitaliser les process critiques qui n'existaient pas, automatisation des tâches manuelles à faible valeur, création de nouvelles briques permettant d'aller chercher du business que l'entreprise ne pouvait pas adresser avant.",
+    icp: "CEO ou COO"
+  },
+  business_gg: {
+    offerName: "Création / Refonte de site",
+    offerSub: "Build orienté conversion",
+    description: "Refonte de sites rigides, audit SEO/CRO, autonomisation de l'équipe métier via CMS et dashboard de suivi.",
+    icp: "Head of Digital ou Directeur Marketing"
+  },
+  business_etismb: {
+    offerName: "Création / Refonte de site",
+    offerSub: "Build orienté conversion",
+    description: "Création ou refonte de site pour lancer une offre et générer des leads, approche cross-expertise intégrée avec un time-to-market imbattable.",
+    icp: "CEO, Directeur Marketing"
+  }
+};
+
+// ============================================================
+// [3] FIREBASE INIT
+// ============================================================
+let db = null;
+let firebaseReady = false;
+
+function initFirebase() {
+  if (firebaseConfig.apiKey === "PASTE_HERE") {
+    console.warn("[expertise-map] Firebase config not set. Please edit the firebaseConfig section.");
+    return false;
+  }
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebaseReady = true;
+    return true;
+  } catch (e) {
+    console.error("[expertise-map] Firebase init error:", e);
+    return false;
+  }
+}
+
+// ============================================================
+// [4] LOCAL STATE
+// ============================================================
+const state = {
+  experts: {}, // cellId -> string[]
+  rex: {}      // cellId -> array of { id, ...data }
+};
+
+// ============================================================
+// [5] FIRESTORE HELPERS
+// ============================================================
+function toggleExpert(cellId, name, checked) {
+  if (!firebaseReady) return;
+  const ref = db.collection("expertise").doc(cellId);
+  const op = checked
+    ? firebase.firestore.FieldValue.arrayUnion(name)
+    : firebase.firestore.FieldValue.arrayRemove(name);
+  ref.set({ experts: op }, { merge: true }).catch(err => {
+    console.error("toggleExpert error:", err);
+  });
+}
+
+function addRex(cellId, data) {
+  if (!firebaseReady) return Promise.reject("Firebase not ready");
+  const [pillar, segment] = splitCellId(cellId);
+  return db.collection("rex").add({
+    pillar,
+    segment,
+    clientName: data.clientName,
+    contactName: data.contactName,
+    contactRole: data.contactRole,
+    missionSubject: data.missionSubject,
+    missionDetail: data.missionDetail,
+    consultants: data.consultants,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+function deleteRex(rexId) {
+  if (!firebaseReady) return;
+  db.collection("rex").doc(rexId).delete().catch(err => {
+    console.error("deleteRex error:", err);
+  });
+}
+
+// ============================================================
+// [6] RENDER FUNCTIONS
+// ============================================================
+function splitCellId(cellId) {
+  const idx = cellId.indexOf("_");
+  return [cellId.substring(0, idx), cellId.substring(idx + 1)];
+}
+
+function renderAllCells() {
+  CELL_IDS.forEach(cellId => renderCell(cellId));
+}
+
+function renderCell(cellId) {
+  const el = document.getElementById("cell-" + cellId);
+  if (!el) return;
+  const content = CELL_CONTENT[cellId];
+  const [pillar] = splitCellId(cellId);
+  const colors = PILLAR_COLORS[pillar];
+
+  el.style.borderColor = colors.border;
+
+  el.innerHTML = `
+    <div class="cell-top" style="background:${colors.light}; border-bottom-color:${colors.border}">
+      <div class="cell-offer-name" style="color:${colors.primary}">${content.offerName}</div>
+      <div class="cell-description">${content.description}</div>
+      <div class="cell-icp-label">ICP</div>
+      <div class="cell-icp">${content.icp}</div>
+    </div>
+
+    <div class="cell-experts">
+      <div class="section-title" style="color:${colors.primary}">Experts / Référents</div>
+      <div class="experts-grid" id="experts-${cellId}">
+        ${CONSULTANTS.map(name => `
+          <label class="expert-item" data-cell="${cellId}" data-name="${name}">
+            <input type="checkbox" data-cell="${cellId}" data-name="${name}" />
+            <div class="expert-check">
+              <svg viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="expert-name">${name}</span>
+          </label>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="cell-rex">
+      <div class="section-title" style="color:${colors.primary}">REX de référence</div>
+      <button class="add-rex-btn" data-cell="${cellId}" style="border-color:${colors.border}; color:${colors.primary}">
+        + Ajouter un REX
+      </button>
+      <div id="rex-cards-${cellId}" class="rex-cards"></div>
+    </div>
+  `;
+
+  // Apply current state
+  updateExpertCheckboxes(cellId, state.experts[cellId] || []);
+  renderRexCards(cellId, state.rex[cellId] || []);
+}
+
+function updateExpertCheckboxes(cellId, experts) {
+  state.experts[cellId] = experts;
+  const [pillar] = splitCellId(cellId);
+  const colors = PILLAR_COLORS[pillar];
+  const container = document.getElementById("experts-" + cellId);
+  if (!container) return;
+  container.querySelectorAll(".expert-item").forEach(item => {
+    const name = item.dataset.name;
+    const isChecked = experts.includes(name);
+    item.classList.toggle("checked", isChecked);
+    const checkBox = item.querySelector(".expert-check");
+    if (isChecked) {
+      checkBox.style.background = colors.primary;
+      checkBox.style.borderColor = colors.primary;
+    } else {
+      checkBox.style.background = "white";
+      checkBox.style.borderColor = "#d1d5db";
+    }
+    const input = item.querySelector("input");
+    if (input) input.checked = isChecked;
+  });
+}
+
+function renderRexCards(cellId, rexDocs) {
+  state.rex[cellId] = rexDocs;
+  const container = document.getElementById("rex-cards-" + cellId);
+  if (!container) return;
+
+  if (rexDocs.length === 0) {
+    container.innerHTML = `<div class="rex-empty">Aucun REX pour ce segment</div>`;
+    return;
+  }
+
+  container.innerHTML = rexDocs.map(doc => {
+    const d = doc.data || doc;
+    const id = doc.id;
+    const consultantTags = (d.consultants || []).map(c =>
+      `<span class="rex-consultant-tag">${c}</span>`
+    ).join("");
+    return `
+      <div class="rex-card" data-rex-id="${id}">
+        <div class="rex-card-header">
+          <div class="rex-card-title">
+            <div class="rex-client">${escHtml(d.clientName || "")}</div>
+            <div class="rex-subject">${escHtml(d.missionSubject || "")}</div>
+          </div>
+          <span class="rex-toggle">▼</span>
+        </div>
+        <div class="rex-card-body">
+          ${d.contactName ? `
+          <div class="rex-field">
+            <div class="rex-field-label">Contact client</div>
+            <div class="rex-field-value">${escHtml(d.contactName)}${d.contactRole ? ` — ${escHtml(d.contactRole)}` : ""}</div>
+          </div>` : ""}
+          ${d.missionSubject ? `
+          <div class="rex-field">
+            <div class="rex-field-label">Sujet</div>
+            <div class="rex-field-value">${escHtml(d.missionSubject)}</div>
+          </div>` : ""}
+          ${d.missionDetail ? `
+          <div class="rex-field">
+            <div class="rex-field-label">Détail</div>
+            <div class="rex-field-value" style="white-space:pre-wrap">${escHtml(d.missionDetail)}</div>
+          </div>` : ""}
+          ${(d.consultants || []).length > 0 ? `
+          <div class="rex-field">
+            <div class="rex-field-label">Consultants impliqués</div>
+            <div class="rex-consultants">${consultantTags}</div>
+          </div>` : ""}
+          <button class="rex-delete-btn" data-rex-id="${id}">Supprimer ce REX</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ============================================================
+// [7] MODAL LOGIC
+// ============================================================
+const modal = document.getElementById("rex-modal");
+const modalBadge = document.getElementById("modal-cell-badge");
+const formCellIdInput = document.getElementById("form-cell-id");
+const rexForm = document.getElementById("rex-form");
+const submitBtn = document.getElementById("form-submit-btn");
+const formError = document.getElementById("form-error");
+const modalConsultantsGrid = document.getElementById("modal-consultants-grid");
+
+function openModal(cellId) {
+  const [pillar, segment] = splitCellId(cellId);
+  const colors = PILLAR_COLORS[pillar];
+  formCellIdInput.value = cellId;
+
+  // Badge
+  modalBadge.textContent = `${PILLAR_LABELS[pillar]} · ${SEGMENT_LABELS[segment]}`;
+  modalBadge.style.background = colors.primary;
+
+  // Reset form
+  document.getElementById("f-client-name").value = "";
+  document.getElementById("f-contact-name").value = "";
+  document.getElementById("f-contact-role").value = "";
+  document.getElementById("f-mission-subject").value = "";
+  document.getElementById("f-mission-detail").value = "";
+  formError.classList.remove("visible");
+  submitBtn.disabled = false;
+
+  // Render consultant checkboxes
+  modalConsultantsGrid.innerHTML = CONSULTANTS.map(name => `
+    <label class="consultant-check-item" data-name="${name}">
+      <input type="checkbox" data-name="${name}" />
+      <div class="c-check"></div>
+      <span class="c-name">${name}</span>
+    </label>
+  `).join("");
+
+  modal.classList.remove("hidden");
+  document.getElementById("f-client-name").focus();
+}
+
+function closeModal() {
+  modal.classList.add("hidden");
+}
+
+function handleFormSubmit(e) {
+  e.preventDefault();
+  const cellId = formCellIdInput.value;
+  const clientName = document.getElementById("f-client-name").value.trim();
+  const contactName = document.getElementById("f-contact-name").value.trim();
+  const contactRole = document.getElementById("f-contact-role").value.trim();
+  const missionSubject = document.getElementById("f-mission-subject").value.trim();
+  const missionDetail = document.getElementById("f-mission-detail").value.trim();
+
+  // Validation
+  if (!clientName) { showFormError("Le nom de l'entreprise cliente est requis."); return; }
+  if (!contactName) { showFormError("Le nom du contact client est requis."); return; }
+  if (!missionSubject) { showFormError("Le sujet de la mission est requis."); return; }
+
+  // Collect checked consultants
+  const consultants = [];
+  modalConsultantsGrid.querySelectorAll(".consultant-check-item").forEach(item => {
+    if (item.classList.contains("checked")) consultants.push(item.dataset.name);
+  });
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Enregistrement…";
+
+  addRex(cellId, { clientName, contactName, contactRole, missionSubject, missionDetail, consultants })
+    .then(() => {
+      closeModal();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Enregistrer le REX";
+    })
+    .catch(err => {
+      console.error("addRex error:", err);
+      showFormError("Erreur lors de l'enregistrement. Vérifiez votre configuration Firebase.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Enregistrer le REX";
+    });
+}
+
+function showFormError(msg) {
+  formError.textContent = msg;
+  formError.classList.add("visible");
+}
+
+// ============================================================
+// [8] EVENT DELEGATION
+// ============================================================
+document.addEventListener("click", function(e) {
+  // Expert checkbox toggle
+  const expertItem = e.target.closest(".expert-item");
+  if (expertItem) {
+    const cellId = expertItem.dataset.cell;
+    const name = expertItem.dataset.name;
+    const isCurrentlyChecked = expertItem.classList.contains("checked");
+    const newState = !isCurrentlyChecked;
+    // Optimistic update
+    const currentExperts = state.experts[cellId] || [];
+    let newExperts;
+    if (newState) {
+      newExperts = currentExperts.includes(name) ? currentExperts : [...currentExperts, name];
+    } else {
+      newExperts = currentExperts.filter(n => n !== name);
+    }
+    updateExpertCheckboxes(cellId, newExperts);
+    toggleExpert(cellId, name, newState);
+    return;
+  }
+
+  // Add REX button
+  const addRexBtn = e.target.closest(".add-rex-btn");
+  if (addRexBtn) {
+    if (!firebaseReady) {
+      alert("Firebase n'est pas configuré. Veuillez compléter la section FIREBASE CONFIG dans le fichier HTML.");
+      return;
+    }
+    openModal(addRexBtn.dataset.cell);
+    return;
+  }
+
+  // REX card toggle expand
+  const rexHeader = e.target.closest(".rex-card-header");
+  if (rexHeader && !e.target.closest(".rex-delete-btn")) {
+    const card = rexHeader.closest(".rex-card");
+    if (card) card.classList.toggle("expanded");
+    return;
+  }
+
+  // Delete REX
+  const deleteBtn = e.target.closest(".rex-delete-btn");
+  if (deleteBtn) {
+    const rexId = deleteBtn.dataset.rexId;
+    if (rexId && confirm("Supprimer ce REX définitivement ?")) {
+      deleteRex(rexId);
+    }
+    return;
+  }
+
+  // Modal close (backdrop or button)
+  if (e.target === modal || e.target.closest("#modal-close-btn") || e.target.closest("#modal-cancel-btn")) {
+    closeModal();
+    return;
+  }
+
+  // Modal consultant checkboxes
+  const consultantItem = e.target.closest(".consultant-check-item");
+  if (consultantItem) {
+    consultantItem.classList.toggle("checked");
+    return;
+  }
+});
+
+// Close modal on Escape
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeModal();
+});
+
+// Form submit
+rexForm.addEventListener("submit", handleFormSubmit);
+
+// ============================================================
+// [9] REAL-TIME LISTENERS
+// ============================================================
+function initListeners() {
+  CELL_IDS.forEach(cellId => {
+    const [pillar, segment] = splitCellId(cellId);
+
+    // Expertise (experts) listener
+    db.collection("expertise").doc(cellId).onSnapshot(doc => {
+      const experts = (doc.exists && doc.data().experts) ? doc.data().experts : [];
+      updateExpertCheckboxes(cellId, experts);
+    }, err => console.error("expertise listener error:", err));
+
+    // REX listener
+    db.collection("rex")
+      .where("pillar", "==", pillar)
+      .where("segment", "==", segment)
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snapshot => {
+        const docs = snapshot.docs.map(d => ({ id: d.id, data: d.data() }));
+        renderRexCards(cellId, docs);
+      }, err => {
+        console.error("rex listener error (pillar=" + pillar + ", segment=" + segment + "):", err);
+        console.info("Si l'erreur mentionne un index manquant, cliquez le lien dans ce log pour le créer automatiquement.");
+      });
+  });
+}
+
+// ============================================================
+// [10] SETUP BANNER
+// ============================================================
+function dismissBanner() {
+  localStorage.setItem("expertise_setup_dismissed", "1");
+  document.getElementById("setup-banner").classList.add("hidden");
+}
+
+function checkBanner() {
+  const dismissed = localStorage.getItem("expertise_setup_dismissed") === "1";
+  const configured = firebaseConfig.apiKey !== "PASTE_HERE";
+  if (dismissed && configured) {
+    document.getElementById("setup-banner").classList.add("hidden");
+  }
+}
+
+// ============================================================
+// [11] BOOTSTRAP
+// ============================================================
+renderAllCells();
+checkBanner();
+
+const ok = initFirebase();
+if (ok) {
+  initListeners();
+} else {
+  console.warn("[expertise-map] Running in offline/demo mode. Firebase not configured.");
+}
+</script>
+</body>
+</html>
