@@ -160,16 +160,29 @@
     }
 
     /* ── CARDS GRID ────────────────────────────────────── */
+    /*
+     * CSS Subgrid (3 colonnes) : toutes les sections internes
+     * de chaque carte partagent les mêmes hauteurs de ligne —
+     * quand une carte grandit, les deux autres grandissent aussi.
+     * Chaque carte = 7 rangées : header | description | icp |
+     *   divider | experts | divider | rex
+     */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      column-gap: 16px;
+      row-gap: 0; /* espacement géré par padding des sections */
     }
+
+    /* Tablette : 2 colonnes — subgrid désactivé */
     @media (max-width: 900px) {
-      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
     }
     @media (max-width: 560px) {
-      .cards-grid { grid-template-columns: 1fr; }
+      .cards-grid { grid-template-columns: 1fr; gap: 12px; }
       #main-content { padding: 16px 12px 40px; gap: 24px; }
       .app-header { padding: 16px; }
       .segment-title { font-size: 14px; }
@@ -177,18 +190,40 @@
 
     /* ── CARD ──────────────────────────────────────────── */
     .card {
+      /* Subgrid : 7 rangées internes alignées entre les 3 cartes */
+      display: grid;
+      grid-row: span 7;
+      grid-template-rows: subgrid;
       background: #fff;
       border-radius: 12px;
       border: 1px solid #e2e8f0;
       border-top: 4px solid var(--pillar-border, #93c5fd);
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
-      transition: box-shadow 0.2s ease, transform 0.15s ease;
+      transition: box-shadow 0.2s ease;
     }
-    .card:hover {
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      transform: translateY(-1px);
+    .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.09); }
+
+    /* Tablette / mobile : retour en flex colonne simple */
+    @media (max-width: 900px) {
+      .card {
+        display: flex;
+        flex-direction: column;
+        grid-row: auto;
+      }
+      /* Réinjecter le padding latéral perdu sans card-body */
+      .card-description,
+      .card-icp,
+      .card-divider,
+      .experts-section,
+      .rex-section {
+        margin-left: 16px;
+        margin-right: 16px;
+      }
+      .card-description { padding-top: 14px; }
+      .card-icp         { padding-top: 10px; }
+      .card-divider     { margin-top: 10px; margin-bottom: 10px; }
+      .experts-section  { padding-top: 0; }
+      .rex-section      { padding-bottom: 16px; padding-top: 0; }
     }
 
     .card-header {
@@ -222,24 +257,22 @@
       font-style: italic;
     }
 
-    .card-body {
-      padding: 14px 16px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    /* card-body supprimé : sections directement enfants de .card */
 
     .card-description {
+      padding: 14px 16px 0;
       font-size: 12.5px;
       color: #374151;
       line-height: 1.6;
+      align-self: start;
     }
 
     .card-icp {
+      padding: 10px 16px 0;
       display: flex;
       gap: 8px;
       align-items: baseline;
+      align-self: start;
     }
     .card-icp dt {
       font-size: 10px;
@@ -263,7 +296,14 @@
     .card-divider {
       height: 1px;
       background: #f1f5f9;
-      margin: 0 -16px;
+      margin: 10px 16px;
+      align-self: center;
+      width: calc(100% - 32px);
+    }
+
+    /* Fallback flex : divider pleine largeur */
+    @media (max-width: 900px) {
+      .card-divider { width: auto; margin: 8px 16px; }
     }
 
     /* ── SECTION HEADING ───────────────────────────────── */
@@ -288,6 +328,15 @@
     }
 
     /* ── EXPERTS ───────────────────────────────────────── */
+    .experts-section {
+      padding: 0 16px;
+      align-self: start;
+    }
+    /* Fallback flex */
+    @media (max-width: 900px) {
+      .experts-section { padding: 0; }
+    }
+
     .experts-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -368,7 +417,16 @@
     }
 
     /* ── REX SECTION ───────────────────────────────────── */
-    .rex-section { flex: 1; display: flex; flex-direction: column; }
+    .rex-section {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-self: stretch; /* s'étire pour remplir la rangée subgrid */
+    }
+    /* Fallback flex */
+    @media (max-width: 900px) {
+      .rex-section { padding: 0; flex: 1; }
+    }
 
     .add-rex-btn {
       display: flex;
@@ -1055,6 +1113,8 @@ function renderCell(cellId) {
   const [pillar] = splitCellId(cellId);
   const content = CELL_CONTENT[cellId];
 
+  /* Les 7 sections sont des enfants directs de .card pour CSS subgrid.
+     Ordre : header | description | icp | divider | experts | divider | rex */
   el.innerHTML = `
     <div class="card-header">
       <div class="card-pillar-badge">${PILLAR_LABELS[pillar]}</div>
@@ -1062,48 +1122,46 @@ function renderCell(cellId) {
       <p class="card-offer-sub">${escHtml(content.offerSub)}</p>
     </div>
 
-    <div class="card-body">
-      <p class="card-description">${escHtml(content.description)}</p>
+    <p class="card-description">${escHtml(content.description)}</p>
 
-      <dl class="card-icp">
-        <dt>ICP</dt>
-        <dd>${escHtml(content.icp)}</dd>
-      </dl>
+    <dl class="card-icp">
+      <dt>ICP</dt>
+      <dd>${escHtml(content.icp)}</dd>
+    </dl>
 
-      <div class="card-divider" role="separator"></div>
+    <div class="card-divider" role="separator"></div>
 
-      <section class="experts-section" aria-labelledby="exp-h-${cellId}">
-        <h4 class="section-heading" id="exp-h-${cellId}">Experts / Référents</h4>
-        <div class="experts-grid" id="experts-${cellId}">
-          ${CONSULTANTS.map(name => {
-            const uid = "exp-" + cellId + "-" + safeId(name);
-            return `
-              <div class="expert-item">
-                <input type="checkbox"
-                       class="expert-cb sr-only"
-                       id="${uid}"
-                       data-cell="${cellId}"
-                       data-name="${name}" />
-                <label for="${uid}" class="expert-label">
-                  <span class="check-visual" aria-hidden="true"></span>
-                  <span class="expert-name">${escHtml(name)}</span>
-                </label>
-              </div>`;
-          }).join("")}
-        </div>
-      </section>
+    <section class="experts-section" aria-labelledby="exp-h-${cellId}">
+      <h4 class="section-heading" id="exp-h-${cellId}">Experts / Référents</h4>
+      <div class="experts-grid" id="experts-${cellId}">
+        ${CONSULTANTS.map(name => {
+          const uid = "exp-" + cellId + "-" + safeId(name);
+          return `
+            <div class="expert-item">
+              <input type="checkbox"
+                     class="expert-cb sr-only"
+                     id="${uid}"
+                     data-cell="${cellId}"
+                     data-name="${name}" />
+              <label for="${uid}" class="expert-label">
+                <span class="check-visual" aria-hidden="true"></span>
+                <span class="expert-name">${escHtml(name)}</span>
+              </label>
+            </div>`;
+        }).join("")}
+      </div>
+    </section>
 
-      <div class="card-divider" role="separator"></div>
+    <div class="card-divider" role="separator"></div>
 
-      <section class="rex-section" aria-labelledby="rex-h-${cellId}">
-        <h4 class="section-heading" id="rex-h-${cellId}">REX de référence</h4>
-        <button class="add-rex-btn" data-cell="${cellId}" type="button">
-          <span class="add-rex-btn-icon" aria-hidden="true">＋</span>
-          Ajouter un REX
-        </button>
-        <div id="rex-cards-${cellId}"></div>
-      </section>
-    </div>
+    <section class="rex-section" aria-labelledby="rex-h-${cellId}">
+      <h4 class="section-heading" id="rex-h-${cellId}">REX de référence</h4>
+      <button class="add-rex-btn" data-cell="${cellId}" type="button">
+        <span class="add-rex-btn-icon" aria-hidden="true">＋</span>
+        Ajouter un REX
+      </button>
+      <div id="rex-cards-${cellId}"></div>
+    </section>
   `;
 
   updateExpertCheckboxes(cellId, state.experts[cellId] || []);
