@@ -407,116 +407,122 @@
       font-style: italic;
     }
 
-    /* ── REX CARDS ─────────────────────────────────────── */
+    /* ── REX LIGNES ────────────────────────────────────── */
     .rex-list { display: flex; flex-direction: column; gap: 6px; }
 
-    .rex-card {
+    .rex-row {
       border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .rex-card-toggle {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      border-left: 3px solid var(--pillar-border, #93c5fd);
+      border-radius: 6px;
+      background: #fafafa;
       padding: 10px 12px;
-      background: #f8fafc;
-      border: none;
-      cursor: pointer;
-      text-align: left;
+      display: grid;
+      grid-template-columns: 1fr auto;
       gap: 8px;
-      font-family: inherit;
+      align-items: start;
       transition: background 0.15s;
-      min-height: 52px;
     }
-    .rex-card-toggle:hover { background: #f1f5f9; }
-    .rex-card-toggle:focus-visible {
-      outline: 3px solid var(--pillar-text, #1e40af);
-      outline-offset: -2px;
-    }
+    .rex-row:hover { background: #f8fafc; }
 
-    .rex-card-title { flex: 1; min-width: 0; }
+    .rex-row-content { min-width: 0; }
+
+    /* Ligne 1 : client · sujet */
+    .rex-row-headline {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
     .rex-client {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       color: #1e293b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
+    .rex-dot { color: #cbd5e1; font-size: 11px; }
     .rex-subject {
-      font-size: 11px;
+      font-size: 12px;
       color: #64748b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 1px;
     }
 
-    .rex-toggle-icon {
-      flex-shrink: 0;
+    /* Ligne 2 : contact · consultants */
+    .rex-row-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .rex-contact {
       font-size: 11px;
       color: #94a3b8;
-      transition: transform 0.2s;
+      font-style: italic;
+      white-space: nowrap;
     }
-    .rex-card-toggle[aria-expanded="true"] .rex-toggle-icon {
-      transform: rotate(180deg);
+    .rex-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .rex-tag {
+      background: var(--pillar-light, #eff6ff);
+      border: 1px solid var(--pillar-border, #93c5fd);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--pillar-text, #1e40af);
     }
 
-    .rex-card-body {
+    /* Détail dépliable */
+    .rex-row-detail {
+      margin-top: 8px;
+      padding-top: 8px;
       border-top: 1px solid #f1f5f9;
-      padding: 12px;
       font-size: 12px;
       color: #374151;
       line-height: 1.6;
+      white-space: pre-wrap;
     }
-    .rex-card-body[hidden] { display: none; }
+    .rex-row-detail[hidden] { display: none; }
 
-    .rex-field { margin-bottom: 8px; }
-    .rex-field:last-of-type { margin-bottom: 10px; }
-    .rex-field-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #94a3b8;
-      margin-bottom: 2px;
-    }
-    .rex-field-value { color: #1e293b; font-size: 12px; }
-
-    .rex-consultants {
+    /* Boutons de ligne */
+    .rex-row-actions {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 4px;
-      margin-top: 3px;
+      flex-shrink: 0;
     }
-    .rex-tag {
-      background: #f1f5f9;
+    .rex-detail-btn {
+      padding: 4px 8px;
       border: 1px solid #e2e8f0;
-      border-radius: 4px;
-      padding: 2px 7px;
-      font-size: 11px;
+      border-radius: 5px;
+      background: #fff;
+      color: #64748b;
+      font-size: 10px;
       font-weight: 600;
-      color: #374151;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      white-space: nowrap;
     }
+    .rex-detail-btn:hover { background: #f1f5f9; color: #1e293b; }
+    .rex-detail-btn:focus-visible { outline: 3px solid #64748b; outline-offset: 2px; }
+    .rex-detail-btn[aria-expanded="true"] { background: #f1f5f9; color: #1e293b; }
 
     .rex-delete-btn {
-      margin-top: 6px;
-      padding: 6px 12px;
-      border: 1.5px solid #fecaca;
-      border-radius: 6px;
-      background: #fff5f5;
+      padding: 4px 8px;
+      border: 1px solid #fecaca;
+      border-radius: 5px;
+      background: #fff;
       color: #dc2626;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
       font-family: inherit;
-      min-height: 36px;
+      white-space: nowrap;
     }
-    .rex-delete-btn:hover { background: #fee2e2; border-color: #fca5a5; }
+    .rex-delete-btn:hover { background: #fee2e2; }
     .rex-delete-btn:focus-visible { outline: 3px solid #dc2626; outline-offset: 2px; }
 
     /* ── MODAL ─────────────────────────────────────────── */
@@ -1128,49 +1134,52 @@ function renderRexCards(cellId, rexDocs) {
   list.setAttribute("role", "list");
 
   rexDocs.forEach(doc => {
-    const d   = doc.data || doc;
-    const id  = doc.id;
-    const bodyId = "rex-body-" + id;
+    const d      = doc.data || doc;
+    const id     = doc.id;
+    const detailId = "rex-detail-" + id;
+
+    const tags = (d.consultants || [])
+      .map(c => `<span class="rex-tag">${escHtml(c)}</span>`)
+      .join("");
+
+    const contactStr = [d.contactName, d.contactRole].filter(Boolean).map(escHtml).join(" · ");
+
+    const hasDetail = !!(d.missionDetail && d.missionDetail.trim());
 
     const item = document.createElement("article");
-    item.className = "rex-card";
+    item.className = "rex-row";
     item.setAttribute("data-rex-id", id);
     item.setAttribute("role", "listitem");
 
-    const tags = (d.consultants || []).map(c =>
-      `<span class="rex-tag">${escHtml(c)}</span>`
-    ).join("");
-
     item.innerHTML = `
-      <button class="rex-card-toggle"
-              aria-expanded="false"
-              aria-controls="${bodyId}"
-              type="button">
-        <div class="rex-card-title">
+      <div class="rex-row-content">
+        <div class="rex-row-headline">
           <span class="rex-client">${escHtml(d.clientName || "")}</span>
+          <span class="rex-dot" aria-hidden="true">·</span>
           <span class="rex-subject">${escHtml(d.missionSubject || "")}</span>
         </div>
-        <span class="rex-toggle-icon" aria-hidden="true">▾</span>
-      </button>
-      <div class="rex-card-body" id="${bodyId}" hidden>
-        ${d.contactName ? `<div class="rex-field">
-          <div class="rex-field-label">Contact client</div>
-          <div class="rex-field-value">${escHtml(d.contactName)}${d.contactRole ? ` — ${escHtml(d.contactRole)}` : ""}</div>
+        <div class="rex-row-meta">
+          ${contactStr ? `<span class="rex-contact">${contactStr}</span>` : ""}
+          ${tags ? `<div class="rex-tags" aria-label="Consultants impliqués">${tags}</div>` : ""}
+        </div>
+        ${hasDetail ? `
+        <div class="rex-row-detail" id="${detailId}" hidden>
+          ${escHtml(d.missionDetail)}
         </div>` : ""}
-        ${d.missionSubject ? `<div class="rex-field">
-          <div class="rex-field-label">Sujet</div>
-          <div class="rex-field-value">${escHtml(d.missionSubject)}</div>
-        </div>` : ""}
-        ${d.missionDetail ? `<div class="rex-field">
-          <div class="rex-field-label">Détail</div>
-          <div class="rex-field-value" style="white-space:pre-wrap">${escHtml(d.missionDetail)}</div>
-        </div>` : ""}
-        ${tags ? `<div class="rex-field">
-          <div class="rex-field-label">Consultants</div>
-          <div class="rex-consultants">${tags}</div>
-        </div>` : ""}
-        <button class="rex-delete-btn" data-rex-id="${id}" type="button">
-          Supprimer ce REX
+      </div>
+      <div class="rex-row-actions">
+        ${hasDetail ? `
+        <button class="rex-detail-btn"
+                type="button"
+                aria-expanded="false"
+                aria-controls="${detailId}">
+          Détail
+        </button>` : ""}
+        <button class="rex-delete-btn"
+                type="button"
+                data-rex-id="${id}"
+                aria-label="Supprimer le REX ${escHtml(d.clientName || "")}">
+          Supprimer
         </button>
       </div>`;
 
@@ -1301,14 +1310,14 @@ document.addEventListener("click", function(e) {
     return;
   }
 
-  // Dépliage/repliage carte REX
-  const toggleBtn = e.target.closest(".rex-card-toggle");
-  if (toggleBtn && !e.target.closest(".rex-delete-btn")) {
-    const expanded = toggleBtn.getAttribute("aria-expanded") === "true";
-    const bodyId   = toggleBtn.getAttribute("aria-controls");
-    const body     = document.getElementById(bodyId);
-    toggleBtn.setAttribute("aria-expanded", String(!expanded));
-    if (body) body.toggleAttribute("hidden");
+  // Dépliage/repliage détail REX
+  const detailBtn = e.target.closest(".rex-detail-btn");
+  if (detailBtn) {
+    const expanded = detailBtn.getAttribute("aria-expanded") === "true";
+    const detailEl = document.getElementById(detailBtn.getAttribute("aria-controls"));
+    detailBtn.setAttribute("aria-expanded", String(!expanded));
+    detailBtn.textContent = expanded ? "Détail" : "Masquer";
+    if (detailEl) detailEl.toggleAttribute("hidden");
     return;
   }
 
@@ -1355,14 +1364,17 @@ function initListeners() {
     db.collection("rex")
       .where("pillar",  "==", pillar)
       .where("segment", "==", segment)
-      .orderBy("createdAt", "desc")
       .onSnapshot(snap => {
-        const docs = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+        // Tri côté client — évite l'index composite Firestore
+        const docs = snap.docs
+          .map(d => ({ id: d.id, data: d.data() }))
+          .sort((a, b) => {
+            const ta = a.data.createdAt ? a.data.createdAt.toMillis() : 0;
+            const tb = b.data.createdAt ? b.data.createdAt.toMillis() : 0;
+            return tb - ta; // plus récent en premier
+          });
         renderRexCards(cellId, docs);
-      }, err => {
-        console.error("rex listener:", err);
-        console.info("Si l'erreur mentionne un index manquant, cliquez le lien dans ce message pour le créer.");
-      });
+      }, err => console.error("rex listener:", err));
   });
 }
 
