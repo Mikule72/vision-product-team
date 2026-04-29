@@ -190,9 +190,10 @@
 
     /* ── CARD ──────────────────────────────────────────── */
     .card {
-      /* Subgrid : 7 rangées internes alignées entre les 3 cartes */
+      /* Subgrid : 8 rangées (header, description, icp, triggers-btn,
+         divider, experts, divider, rex) alignées entre les 3 cartes */
       display: grid;
-      grid-row: span 7;
+      grid-row: span 8;
       grid-template-rows: subgrid;
       background: #fff;
       border-radius: 12px;
@@ -290,6 +291,40 @@
       font-size: 12px;
       color: #374151;
       font-style: italic;
+    }
+
+    /* ── BOUTON ENJEUX & TRIGGERS ──────────────────────── */
+    .triggers-btn {
+      margin: 12px 16px 0;
+      padding: 8px 12px;
+      border: 1.5px solid var(--pillar-border, #93c5fd);
+      border-radius: 7px;
+      background: var(--pillar-light, #eff6ff);
+      color: var(--pillar-text, #1e40af);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      min-height: 40px;
+      transition: all 0.15s;
+      align-self: start;
+    }
+    .triggers-btn:hover {
+      background: var(--pillar-text);
+      color: #fff;
+      border-color: var(--pillar-text);
+    }
+    .triggers-btn:focus-visible {
+      outline: 3px solid var(--pillar-text);
+      outline-offset: 2px;
+    }
+    .triggers-btn-icon { font-size: 14px; }
+    @media (max-width: 900px) {
+      .triggers-btn { margin: 12px 16px 0; }
     }
 
     /* ── DIVIDER ───────────────────────────────────────── */
@@ -812,6 +847,77 @@
     }
     .form-error.visible { display: block; }
 
+    /* ── MODALE TRIGGERS ───────────────────────────────── */
+    .triggers-modal-content {
+      background: #fff;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 760px;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+    }
+    .triggers-modal-body {
+      padding: 18px 22px 22px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 760px) {
+      .triggers-modal-body { grid-template-columns: 1fr; }
+    }
+
+    .triggers-group {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid var(--triggers-color, #1e40af);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .triggers-group-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--triggers-color, #1e40af);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .triggers-group-icon { font-size: 14px; }
+    .triggers-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .triggers-list li {
+      font-size: 12px;
+      color: #1e293b;
+      line-height: 1.5;
+      padding-left: 14px;
+      position: relative;
+    }
+    .triggers-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--triggers-color, #1e40af);
+    }
+    .triggers-list--pains li {
+      font-style: italic;
+      color: #475569;
+    }
+
     /* ── FOCUS GLOBAL ──────────────────────────────────── */
     :focus-visible {
       outline: 3px solid #4f46e5;
@@ -931,6 +1037,25 @@
   </div>
 </div>
 
+<!-- ── MODALE ENJEUX & TRIGGERS ────────────────────────── -->
+<div id="triggers-modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="triggers-modal-title"
+     class="modal-overlay"
+     hidden>
+  <div class="triggers-modal-content" tabindex="-1">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h2 id="triggers-modal-title">Enjeux &amp; Triggers clients</h2>
+        <span id="triggers-modal-badge" class="modal-cell-badge"></span>
+      </div>
+      <button class="modal-close-btn" id="triggers-modal-close" aria-label="Fermer la modale">✕</button>
+    </div>
+    <div class="triggers-modal-body" id="triggers-modal-body"></div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // [1] FIREBASE CONFIG — Collez votre configuration ici
@@ -967,7 +1092,8 @@ const PILLAR_LABELS = {
   business: "Business"
 };
 
-const SEGMENT_GRID = { gg: "grid-gg", etismb: "grid-etismb" };
+const SEGMENT_LABELS = { gg: "Corporate / GG", etismb: "ETI / SMB" };
+const SEGMENT_GRID   = { gg: "grid-gg", etismb: "grid-etismb" };
 
 const CELL_CONTENT = {
   strategie_gg: {
@@ -1005,6 +1131,166 @@ const CELL_CONTENT = {
     offerSub:  "Build orienté conversion",
     description: "Création ou refonte de site pour lancer une offre et générer des leads, approche cross-expertise avec un time-to-market imbattable.",
     icp: "CEO, Directeur Marketing"
+  }
+};
+
+// Enjeux & Triggers clients (section 6 du document de cadrage)
+const TRIGGERS = {
+  strategie_gg: {
+    triggers: [
+      "Arrivée d'un nouveau CPO, CDO ou CMO (souvent dans les 6 premiers mois)",
+      "Plan stratégique groupe ou nouveau cap (transformation digitale, IA, customer-centricity)",
+      "Fusion / acquisition / rapprochement d'entités avec organisations produit hétérogènes",
+      "Échec ou retard significatif d'un programme produit phare",
+      "Revue de performance annuelle pointant un sous-investissement produit vs concurrence",
+      "Renouvellement / création d'une BU digitale ou produit"
+    ],
+    signals: [
+      "Multiplication des comités sans décisions claires sur la roadmap produit",
+      "Décalage perçu entre discours d'innovation et delivery réel",
+      "Rotation élevée chez les Product Managers (départs, démissions)",
+      "Tensions Marketing ↔ Tech ↔ Produit autour de la priorisation",
+      "Difficulté à recruter des seniors produit (employer brand peu lisible)",
+      "Le COMEX demande des KPI produit que personne ne sait construire"
+    ],
+    pains: [
+      "« On a 30 PMs mais on ne livre rien de visible »",
+      "« Notre roadmap est une liste de projets pas une vision »",
+      "« On ne sait pas qui tranche entre Marketing, Tech et Produit »",
+      "« Nos PMs sont en mode delivery, pas discovery »",
+      "« On veut industrialiser le produit comme un métier, pas comme du sur-mesure »",
+      "« Notre maturité produit est en retard sur nos concurrents »"
+    ]
+  },
+  strategie_etismb: {
+    triggers: [
+      "Levée de fonds ou ouverture de capital récente (pression croissance)",
+      "Arrivée d'un CEO opérationnel ou d'un nouveau CMO/CDO",
+      "Lancement d'un nouveau produit / d'une nouvelle ligne business",
+      "Croissance qui dépasse la capacité de l'équipe produit informelle",
+      "Pivot ou repositionnement stratégique post-difficulté commerciale",
+      "Embauche ratée d'un Head of Product (départ < 12 mois)"
+    ],
+    signals: [
+      "Le CEO continue d'arbitrer toutes les décisions produit",
+      "Les devs reçoivent des specs orales différentes selon l'interlocuteur",
+      "L'équipe se compare à des scale-ups concurrentes sans savoir comment les rattraper",
+      "Tableur Excel qui sert de roadmap pour 30+ chantiers",
+      "Le CEO commence à parler d'OKR ou de Product-Led Growth dans les comités",
+      "Recherches Google récurrentes sur « comment structurer une équipe produit »"
+    ],
+    pains: [
+      "« On grandit mais on n'a pas de méthode produit »",
+      "« Je suis le CEO et je passe encore 50 % de mon temps à arbitrer des features »",
+      "« On a embauché un Head of Product, ça n'a pas marché »",
+      "« On veut passer d'une logique projet à une logique produit »",
+      "« On a besoin d'un cadre pour décider quoi faire et quoi ne pas faire »",
+      "« Nos PMs sont juniors et n'arrivent pas à challenger le métier »"
+    ]
+  },
+  operationnel_gg: {
+    triggers: [
+      "Lancement d'un programme de transformation interne (efficacité, modernisation SI)",
+      "Refonte d'outils métier vieillissants (ERP, CRM, intranet) avec budget alloué",
+      "Audit interne pointant un coût d'inefficacité opérationnelle quantifié",
+      "Plan de réduction de coûts ou de réallocation de FTE vers la valeur",
+      "Déploiement d'IA générative en interne (assistants, copilotes, RAG métier)",
+      "Migration cloud ou refonte d'architecture qui libère du capacity SI"
+    ],
+    signals: [
+      "Outils internes contournés via Excel, Notion ou WhatsApp par les équipes",
+      "Tickets DSI saturés sur des demandes qui se répètent",
+      "Onboarding interne qui dure plus de 3 mois pour un collaborateur opérationnel",
+      "Les équipes métier appellent leurs propres outils des « usines à gaz »",
+      "Faible adoption mesurée des outils internes (< 40 %) malgré les déploiements",
+      "Le COO ou DRH parle de plus en plus d'« employee experience »"
+    ],
+    pains: [
+      "« Nos équipes passent un temps fou à faire du copier-coller entre 3 outils »",
+      "« Notre outil interne est tellement compliqué que personne ne l'utilise »",
+      "« On a déployé un super outil, l'adoption est à 20 % »",
+      "« Nos process sont tribaux, ils ne survivent pas à un départ »",
+      "« On veut traiter nos employés comme on traite nos clients B2C »",
+      "« Notre DSI livre, mais le métier ne s'en sert pas »"
+    ]
+  },
+  operationnel_etismb: {
+    triggers: [
+      "Croissance qui rend les process manuels intenables (volume × 2 en 18 mois)",
+      "Lancement d'une nouvelle activité qui n'a pas d'outil dédié",
+      "Embauche difficile sur des fonctions opérationnelles (besoin d'automatisation)",
+      "Audit financier pointant un coût caché élevé sur des tâches répétitives",
+      "Première recrue digitale / produit qui doit faire ses preuves rapidement",
+      "Réorganisation interne post-croissance (passage de 50 à 200 personnes)"
+    ],
+    signals: [
+      "Process critique géré par une seule personne via Excel + emails",
+      "Le CEO découvre des erreurs opérationnelles qui auraient dû être évitées",
+      "Le COO reporte régulièrement « on saura faire avec un outil »",
+      "Outils SaaS multipliés (15+) sans intégration entre eux",
+      "Les commerciaux ressaisissent des données dans 3 systèmes différents",
+      "Apparition de Notion / Airtable bricolés en remplacement des outils officiels"
+    ],
+    pains: [
+      "« On a un process qui repose sur Sophie, si elle part on est morts »",
+      "« On veut digitaliser ce process mais on ne sait pas par où commencer »",
+      "« Nos équipes ressaisissent les mêmes données 3 fois »",
+      "« On a essayé un éditeur, ça ne colle pas à notre métier »",
+      "« On veut un outil sur-mesure mais sans payer 18 mois de dev »",
+      "« On veut aller chercher du business qu'on ne pouvait pas adresser avant »"
+    ]
+  },
+  business_gg: {
+    triggers: [
+      "Site corporate / vitrine vieillissant (3+ ans sans refonte majeure)",
+      "Arrivée d'un nouveau Directeur Marketing ou Head of Digital",
+      "Plan marketing annuel avec objectif lead generation digitale",
+      "Lancement d'une nouvelle marque, produit, ou positionnement à incarner",
+      "Audit SEO externe pointant des pertes de trafic ou de positions",
+      "Décision de réinternaliser la maîtrise du contenu (sortir d'une agence)"
+    ],
+    signals: [
+      "L'équipe marketing dépend de la DSI pour publier la moindre page",
+      "Délai de 4-6 semaines pour modifier un wording sur le site",
+      "Tunnel de conversion avec drop-off massif sur des étapes clés",
+      "Multiples sites legacy (un par BU) sans cohérence ni plateforme commune",
+      "Le CMO parle de « rigidité » du site dans les comités",
+      "Trafic en baisse silencieuse vs concurrents qui investissent SEO/SEA"
+    ],
+    pains: [
+      "« Notre site est une vitrine, il ne convertit pas »",
+      "« Pour modifier un titre il faut 3 semaines et un ticket DSI »",
+      "« On veut autonomiser le marketing sur le contenu et les landings »",
+      "« On a perdu X % de trafic SEO sans comprendre pourquoi »",
+      "« Notre site a 5 ans, on a honte de le montrer en pitch »",
+      "« On veut un dashboard qui dit ce qui marche, pas un Google Analytics opaque »"
+    ]
+  },
+  business_etismb: {
+    triggers: [
+      "Lancement d'une offre, d'une marque ou d'un produit nouveau",
+      "Levée de fonds avec budget marketing/acquisition débloqué",
+      "Pression concurrentielle d'un acteur récent au site mieux conçu",
+      "Pivot ou montée en gamme nécessitant un nouveau récit de marque",
+      "Échec d'une refonte précédente faite par une agence trop lente",
+      "Recrutement d'un premier Head of Marketing structurant"
+    ],
+    signals: [
+      "Site WordPress bricolé qui prend l'eau (perfs, SEO, sécurité)",
+      "Le CEO bricole encore des modifs sur le site lui-même",
+      "Coûts d'acquisition payante qui s'envolent faute de conversion organique",
+      "Pas de page produit dédiée pour des offres pourtant clés du business",
+      "Multiplication d'outils (Webflow, Hubspot, Notion) sans backbone clair",
+      "Le marketing demande à recruter un dev front juste pour la maintenance"
+    ],
+    pains: [
+      "« On lance une offre dans 3 mois et on n'a pas de site qui la porte »",
+      "« On dépense en SEA mais le site ne convertit pas »",
+      "« Notre concurrent X a un site magnifique, on a l'air ringards »",
+      "« On veut un site rapide à mettre en ligne sans dépendre d'une agence »",
+      "« On a tout essayé : Wordpress, Webflow, et rien ne tient à l'échelle »",
+      "« On veut savoir mesurer ce qui marche et itérer »"
+    ]
   }
 };
 
@@ -1128,6 +1414,12 @@ function renderCell(cellId) {
       <dt>ICP</dt>
       <dd>${escHtml(content.icp)}</dd>
     </dl>
+
+    <button class="triggers-btn" data-cell="${cellId}" type="button"
+            aria-haspopup="dialog">
+      <span><span class="triggers-btn-icon" aria-hidden="true">🎯</span> Enjeux &amp; triggers clients</span>
+      <span aria-hidden="true">→</span>
+    </button>
 
     <div class="card-divider" role="separator"></div>
 
@@ -1333,6 +1625,43 @@ function showFormError(msg) {
   formError.classList.add("visible");
 }
 
+// ── Modale Triggers ────────────────────────────────────
+const triggersModal     = document.getElementById("triggers-modal");
+const triggersModalBadge = document.getElementById("triggers-modal-badge");
+const triggersModalBody = document.getElementById("triggers-modal-body");
+
+function openTriggersModal(cellId) {
+  const data = TRIGGERS[cellId];
+  if (!data) return;
+  const [pillar, segment] = splitCellId(cellId);
+  const c = PILLAR_COLORS[pillar];
+
+  triggersModalBadge.textContent = PILLAR_LABELS[pillar] + " · " + SEGMENT_LABELS[segment];
+  triggersModalBadge.style.background = c.badge;
+
+  const renderGroup = (icon, title, items, modifier) => `
+    <section class="triggers-group" style="--triggers-color:${c.text}">
+      <h3 class="triggers-group-title">
+        <span class="triggers-group-icon" aria-hidden="true">${icon}</span>${title}
+      </h3>
+      <ul class="triggers-list ${modifier || ""}">
+        ${items.map(it => `<li>${escHtml(it)}</li>`).join("")}
+      </ul>
+    </section>`;
+
+  triggersModalBody.innerHTML =
+    renderGroup("📅", "Événements déclencheurs", data.triggers, "") +
+    renderGroup("👂", "Signaux faibles",        data.signals,  "") +
+    renderGroup("💬", "Douleurs exprimées",     data.pains,    "triggers-list--pains");
+
+  triggersModal.removeAttribute("hidden");
+  setTimeout(() => triggersModal.querySelector(".triggers-modal-content").focus(), 50);
+}
+
+function closeTriggersModal() {
+  triggersModal.setAttribute("hidden", "");
+}
+
 // ============================================================
 // [9] ÉVÉNEMENTS
 // ============================================================
@@ -1368,6 +1697,19 @@ document.addEventListener("click", function(e) {
     return;
   }
 
+  // Bouton Enjeux & Triggers
+  const trigBtn = e.target.closest(".triggers-btn");
+  if (trigBtn) {
+    openTriggersModal(trigBtn.dataset.cell);
+    return;
+  }
+
+  // Fermeture modale Triggers (backdrop ou bouton)
+  if (e.target === triggersModal || e.target.closest("#triggers-modal-close")) {
+    closeTriggersModal();
+    return;
+  }
+
   // Dépliage/repliage détail REX
   const detailBtn = e.target.closest(".rex-detail-btn");
   if (detailBtn) {
@@ -1393,9 +1735,11 @@ document.addEventListener("click", function(e) {
   }
 });
 
-// Fermer modale avec Échap
+// Fermer modales avec Échap
 document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape" && !modal.hasAttribute("hidden")) closeModal();
+  if (e.key !== "Escape") return;
+  if (!modal.hasAttribute("hidden")) closeModal();
+  if (!triggersModal.hasAttribute("hidden")) closeTriggersModal();
 });
 
 // Soumission du formulaire
