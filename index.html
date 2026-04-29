@@ -888,6 +888,19 @@
       border-bottom: 1px solid #e2e8f0;
     }
     .triggers-group-icon { font-size: 14px; }
+    /* Compteur d'éléments masqués */
+    .triggers-count {
+      margin-left: auto;
+      background: var(--triggers-color, #1e40af);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      letter-spacing: 0;
+    }
+    .triggers-modal-content.expanded .triggers-count { display: none; }
+
     .triggers-list {
       list-style: none;
       padding: 0;
@@ -916,6 +929,52 @@
     .triggers-list--pains li {
       font-style: italic;
       color: #475569;
+    }
+    /* Items secondaires : cachés par défaut, visibles en mode expanded */
+    .triggers-list li.extra { display: none; }
+    .triggers-modal-content.expanded .triggers-list li.extra {
+      display: list-item;
+      animation: fadeInExtra 0.25s ease;
+    }
+    @keyframes fadeInExtra {
+      from { opacity: 0; transform: translateY(-3px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CTA "Afficher plus" — pleine largeur sous les 3 colonnes */
+    .triggers-show-more {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      padding: 12px 18px;
+      border: 1.5px solid var(--triggers-color, #1e40af);
+      border-radius: 9px;
+      background: #fff;
+      color: var(--triggers-color, #1e40af);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      transition: all 0.15s;
+    }
+    .triggers-show-more:hover {
+      background: var(--triggers-color, #1e40af);
+      color: #fff;
+    }
+    .triggers-show-more:focus-visible {
+      outline: 3px solid var(--triggers-color, #1e40af);
+      outline-offset: 2px;
+    }
+    .triggers-show-more .show-more-icon {
+      font-size: 14px;
+      transition: transform 0.2s;
+    }
+    .triggers-modal-content.expanded .triggers-show-more .show-more-icon {
+      transform: rotate(180deg);
     }
 
     /* ── FOCUS GLOBAL ──────────────────────────────────── */
@@ -1135,29 +1194,31 @@ const CELL_CONTENT = {
 };
 
 // Enjeux & Triggers clients (section 6 du document de cadrage)
+// Les 3 premiers éléments de chaque liste sont les plus fréquents/douloureux
+// (affichés par défaut). Les suivants sont disponibles via "Afficher plus".
 const TRIGGERS = {
   strategie_gg: {
     triggers: [
       "Arrivée d'un nouveau CPO, CDO ou CMO (souvent dans les 6 premiers mois)",
       "Plan stratégique groupe ou nouveau cap (transformation digitale, IA, customer-centricity)",
-      "Fusion / acquisition / rapprochement d'entités avec organisations produit hétérogènes",
       "Échec ou retard significatif d'un programme produit phare",
+      "Fusion / acquisition / rapprochement d'entités avec organisations produit hétérogènes",
       "Revue de performance annuelle pointant un sous-investissement produit vs concurrence",
       "Renouvellement / création d'une BU digitale ou produit"
     ],
     signals: [
       "Multiplication des comités sans décisions claires sur la roadmap produit",
+      "Tensions Marketing ↔ Tech ↔ Produit autour de la priorisation",
+      "Le COMEX demande des KPI produit que personne ne sait construire",
       "Décalage perçu entre discours d'innovation et delivery réel",
       "Rotation élevée chez les Product Managers (départs, démissions)",
-      "Tensions Marketing ↔ Tech ↔ Produit autour de la priorisation",
-      "Difficulté à recruter des seniors produit (employer brand peu lisible)",
-      "Le COMEX demande des KPI produit que personne ne sait construire"
+      "Difficulté à recruter des seniors produit (employer brand peu lisible)"
     ],
     pains: [
       "« On a 30 PMs mais on ne livre rien de visible »",
       "« Notre roadmap est une liste de projets pas une vision »",
-      "« On ne sait pas qui tranche entre Marketing, Tech et Produit »",
       "« Nos PMs sont en mode delivery, pas discovery »",
+      "« On ne sait pas qui tranche entre Marketing, Tech et Produit »",
       "« On veut industrialiser le produit comme un métier, pas comme du sur-mesure »",
       "« Notre maturité produit est en retard sur nos concurrents »"
     ]
@@ -1165,50 +1226,50 @@ const TRIGGERS = {
   strategie_etismb: {
     triggers: [
       "Levée de fonds ou ouverture de capital récente (pression croissance)",
+      "Croissance qui dépasse la capacité de l'équipe produit informelle",
+      "Embauche ratée d'un Head of Product (départ < 12 mois)",
       "Arrivée d'un CEO opérationnel ou d'un nouveau CMO/CDO",
       "Lancement d'un nouveau produit / d'une nouvelle ligne business",
-      "Croissance qui dépasse la capacité de l'équipe produit informelle",
-      "Pivot ou repositionnement stratégique post-difficulté commerciale",
-      "Embauche ratée d'un Head of Product (départ < 12 mois)"
+      "Pivot ou repositionnement stratégique post-difficulté commerciale"
     ],
     signals: [
       "Le CEO continue d'arbitrer toutes les décisions produit",
+      "Tableur Excel qui sert de roadmap pour 30+ chantiers",
       "Les devs reçoivent des specs orales différentes selon l'interlocuteur",
       "L'équipe se compare à des scale-ups concurrentes sans savoir comment les rattraper",
-      "Tableur Excel qui sert de roadmap pour 30+ chantiers",
       "Le CEO commence à parler d'OKR ou de Product-Led Growth dans les comités",
       "Recherches Google récurrentes sur « comment structurer une équipe produit »"
     ],
     pains: [
-      "« On grandit mais on n'a pas de méthode produit »",
       "« Je suis le CEO et je passe encore 50 % de mon temps à arbitrer des features »",
-      "« On a embauché un Head of Product, ça n'a pas marché »",
+      "« On grandit mais on n'a pas de méthode produit »",
       "« On veut passer d'une logique projet à une logique produit »",
+      "« On a embauché un Head of Product, ça n'a pas marché »",
       "« On a besoin d'un cadre pour décider quoi faire et quoi ne pas faire »",
       "« Nos PMs sont juniors et n'arrivent pas à challenger le métier »"
     ]
   },
   operationnel_gg: {
     triggers: [
-      "Lancement d'un programme de transformation interne (efficacité, modernisation SI)",
       "Refonte d'outils métier vieillissants (ERP, CRM, intranet) avec budget alloué",
+      "Lancement d'un programme de transformation interne (efficacité, modernisation SI)",
+      "Déploiement d'IA générative en interne (assistants, copilotes, RAG métier)",
       "Audit interne pointant un coût d'inefficacité opérationnelle quantifié",
       "Plan de réduction de coûts ou de réallocation de FTE vers la valeur",
-      "Déploiement d'IA générative en interne (assistants, copilotes, RAG métier)",
       "Migration cloud ou refonte d'architecture qui libère du capacity SI"
     ],
     signals: [
       "Outils internes contournés via Excel, Notion ou WhatsApp par les équipes",
+      "Faible adoption mesurée des outils internes (< 40 %) malgré les déploiements",
+      "Les équipes métier appellent leurs propres outils des « usines à gaz »",
       "Tickets DSI saturés sur des demandes qui se répètent",
       "Onboarding interne qui dure plus de 3 mois pour un collaborateur opérationnel",
-      "Les équipes métier appellent leurs propres outils des « usines à gaz »",
-      "Faible adoption mesurée des outils internes (< 40 %) malgré les déploiements",
       "Le COO ou DRH parle de plus en plus d'« employee experience »"
     ],
     pains: [
       "« Nos équipes passent un temps fou à faire du copier-coller entre 3 outils »",
-      "« Notre outil interne est tellement compliqué que personne ne l'utilise »",
       "« On a déployé un super outil, l'adoption est à 20 % »",
+      "« Notre outil interne est tellement compliqué que personne ne l'utilise »",
       "« Nos process sont tribaux, ils ne survivent pas à un départ »",
       "« On veut traiter nos employés comme on traite nos clients B2C »",
       "« Notre DSI livre, mais le métier ne s'en sert pas »"
@@ -1217,24 +1278,24 @@ const TRIGGERS = {
   operationnel_etismb: {
     triggers: [
       "Croissance qui rend les process manuels intenables (volume × 2 en 18 mois)",
-      "Lancement d'une nouvelle activité qui n'a pas d'outil dédié",
       "Embauche difficile sur des fonctions opérationnelles (besoin d'automatisation)",
+      "Lancement d'une nouvelle activité qui n'a pas d'outil dédié",
       "Audit financier pointant un coût caché élevé sur des tâches répétitives",
       "Première recrue digitale / produit qui doit faire ses preuves rapidement",
       "Réorganisation interne post-croissance (passage de 50 à 200 personnes)"
     ],
     signals: [
       "Process critique géré par une seule personne via Excel + emails",
-      "Le CEO découvre des erreurs opérationnelles qui auraient dû être évitées",
-      "Le COO reporte régulièrement « on saura faire avec un outil »",
       "Outils SaaS multipliés (15+) sans intégration entre eux",
       "Les commerciaux ressaisissent des données dans 3 systèmes différents",
+      "Le CEO découvre des erreurs opérationnelles qui auraient dû être évitées",
+      "Le COO reporte régulièrement « on saura faire avec un outil »",
       "Apparition de Notion / Airtable bricolés en remplacement des outils officiels"
     ],
     pains: [
+      "« Nos équipes ressaisissent les mêmes données 3 fois »",
       "« On a un process qui repose sur Sophie, si elle part on est morts »",
       "« On veut digitaliser ce process mais on ne sait pas par où commencer »",
-      "« Nos équipes ressaisissent les mêmes données 3 fois »",
       "« On a essayé un éditeur, ça ne colle pas à notre métier »",
       "« On veut un outil sur-mesure mais sans payer 18 mois de dev »",
       "« On veut aller chercher du business qu'on ne pouvait pas adresser avant »"
@@ -1269,25 +1330,25 @@ const TRIGGERS = {
   business_etismb: {
     triggers: [
       "Lancement d'une offre, d'une marque ou d'un produit nouveau",
-      "Levée de fonds avec budget marketing/acquisition débloqué",
       "Pression concurrentielle d'un acteur récent au site mieux conçu",
+      "Levée de fonds avec budget marketing/acquisition débloqué",
       "Pivot ou montée en gamme nécessitant un nouveau récit de marque",
       "Échec d'une refonte précédente faite par une agence trop lente",
       "Recrutement d'un premier Head of Marketing structurant"
     ],
     signals: [
       "Site WordPress bricolé qui prend l'eau (perfs, SEO, sécurité)",
-      "Le CEO bricole encore des modifs sur le site lui-même",
       "Coûts d'acquisition payante qui s'envolent faute de conversion organique",
+      "Le CEO bricole encore des modifs sur le site lui-même",
       "Pas de page produit dédiée pour des offres pourtant clés du business",
       "Multiplication d'outils (Webflow, Hubspot, Notion) sans backbone clair",
       "Le marketing demande à recruter un dev front juste pour la maintenance"
     ],
     pains: [
-      "« On lance une offre dans 3 mois et on n'a pas de site qui la porte »",
       "« On dépense en SEA mais le site ne convertit pas »",
-      "« Notre concurrent X a un site magnifique, on a l'air ringards »",
+      "« On lance une offre dans 3 mois et on n'a pas de site qui la porte »",
       "« On veut un site rapide à mettre en ligne sans dépendre d'une agence »",
+      "« Notre concurrent X a un site magnifique, on a l'air ringards »",
       "« On a tout essayé : Wordpress, Webflow, et rien ne tient à l'échelle »",
       "« On veut savoir mesurer ce qui marche et itérer »"
     ]
@@ -1639,21 +1700,45 @@ function openTriggersModal(cellId) {
   triggersModalBadge.textContent = PILLAR_LABELS[pillar] + " · " + SEGMENT_LABELS[segment];
   triggersModalBadge.style.background = c.badge;
 
-  const renderGroup = (icon, title, items, modifier) => `
-    <section class="triggers-group" style="--triggers-color:${c.text}">
-      <h3 class="triggers-group-title">
-        <span class="triggers-group-icon" aria-hidden="true">${icon}</span>${title}
-      </h3>
-      <ul class="triggers-list ${modifier || ""}">
-        ${items.map(it => `<li>${escHtml(it)}</li>`).join("")}
-      </ul>
-    </section>`;
+  // Top 3 priorités d'abord, puis le reste marqué .extra (caché par défaut)
+  const renderGroup = (icon, title, items, modifier) => {
+    const priorityCount = 3;
+    const liHtml = items.map((it, i) =>
+      `<li${i >= priorityCount ? ' class="extra"' : ""}>${escHtml(it)}</li>`
+    ).join("");
+    const extraCount = Math.max(0, items.length - priorityCount);
+    return `
+      <section class="triggers-group" style="--triggers-color:${c.text}">
+        <h3 class="triggers-group-title">
+          <span class="triggers-group-icon" aria-hidden="true">${icon}</span>${title}
+          ${extraCount ? `<span class="triggers-count">+${extraCount}</span>` : ""}
+        </h3>
+        <ul class="triggers-list ${modifier || ""}">${liHtml}</ul>
+      </section>`;
+  };
+
+  // Compteur global d'éléments cachés
+  const totalExtra =
+    Math.max(0, data.triggers.length - 3) +
+    Math.max(0, data.signals.length  - 3) +
+    Math.max(0, data.pains.length    - 3);
 
   triggersModalBody.innerHTML =
     renderGroup("📅", "Événements déclencheurs", data.triggers, "") +
     renderGroup("👂", "Signaux faibles",        data.signals,  "") +
-    renderGroup("💬", "Douleurs exprimées",     data.pains,    "triggers-list--pains");
+    renderGroup("💬", "Douleurs exprimées",     data.pains,    "triggers-list--pains") +
+    (totalExtra ? `
+      <button class="triggers-show-more" type="button"
+              aria-expanded="false"
+              data-collapsed-label="Afficher tous les enjeux (${totalExtra} de plus)"
+              data-expanded-label="Réduire l'affichage"
+              style="--triggers-color:${c.text}">
+        <span class="show-more-label">Afficher tous les enjeux (${totalExtra} de plus)</span>
+        <span class="show-more-icon" aria-hidden="true">↓</span>
+      </button>` : "");
 
+  // Reset état déplié à chaque ouverture
+  triggersModal.querySelector(".triggers-modal-content").classList.remove("expanded");
   triggersModal.removeAttribute("hidden");
   setTimeout(() => triggersModal.querySelector(".triggers-modal-content").focus(), 50);
 }
@@ -1701,6 +1786,19 @@ document.addEventListener("click", function(e) {
   const trigBtn = e.target.closest(".triggers-btn");
   if (trigBtn) {
     openTriggersModal(trigBtn.dataset.cell);
+    return;
+  }
+
+  // CTA "Afficher tous les enjeux" → toggle expanded
+  const showMoreBtn = e.target.closest(".triggers-show-more");
+  if (showMoreBtn) {
+    const content = triggersModal.querySelector(".triggers-modal-content");
+    const expanded = content.classList.toggle("expanded");
+    showMoreBtn.setAttribute("aria-expanded", String(expanded));
+    const label = showMoreBtn.querySelector(".show-more-label");
+    label.textContent = expanded
+      ? showMoreBtn.dataset.expandedLabel
+      : showMoreBtn.dataset.collapsedLabel;
     return;
   }
 
